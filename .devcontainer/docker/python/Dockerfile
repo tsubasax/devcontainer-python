@@ -1,0 +1,39 @@
+FROM python:3.9-slim-buster
+
+ARG UID=1000
+ARG GID=1000
+ARG USER_NAME=vscode
+
+# Change timezone
+ENV TZ=Asia/Tokyo
+
+# Install packages
+RUN apt-get update \
+  && apt-get -y install \
+  git \
+  locales \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
+# Change locale
+RUN sed -i -E 's/# (ja_JP.UTF-8)/\1/' /etc/locale.gen \
+  && locale-gen ja_JP.UTF-8
+
+ENV LANG=ja_JP.UTF-8
+ENV LANGUAGE=ja_JP:ja
+ENV LC_ALL=ja_JP.UTF-8
+
+# Switch to non-root user
+RUN groupadd -g "${GID}" "${USER_NAME}" \
+  && useradd -lm -s /bin/bash -u "${UID}" -g "${USER_NAME}" "${USER_NAME}"
+
+USER ${USER_NAME}
+
+# Install Python components
+RUN pip install \
+  black \
+  flake8 \
+  poetry
+
+# Create workspace
+WORKDIR /app

@@ -1,0 +1,9 @@
+version: "3"
+volumes:
+  python-volume:
+services:
+  app:
+    build: ./docker/python
+    tty: true
+    volumes:
+      - python-volume:/app
